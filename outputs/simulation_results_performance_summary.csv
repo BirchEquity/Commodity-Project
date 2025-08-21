@@ -1,0 +1,5 @@
+Arb_Name,Prediction_Correct_mean,Prediction_Correct_count,Within_Range_mean,Prediction_Error_mean,Prediction_Error_std
+Brent_Dubai,0.9888,89,0.9551,1.5421,0.5915
+Brent_WTI,0.5955,89,0.9551,0.8165,0.1536
+Eurobob_USGC_Gasoline,0.9551,89,0.9551,1.9865,1.58
+Rotterdam_Singapore_Gasoil,0.191,89,0.9551,1.2506,0.3453

@@ -1,0 +1,97 @@
+COMMODITY TRADING ANALYTICS REPORT
+==================================================
+Generated: 2025-08-21 23:30:37
+
+OVERALL STATISTICS
+--------------------
+Total observations: 11,104
+Valid arbitrage calculations: 10,070
+Data quality: 90.7%
+
+ARBITRAGE OPPORTUNITY SUMMARY
+------------------------------
+
+Brent_Dubai: East vs West Crude Arb (Dubai - Brent)
+  Total trading days: 2775
+  Arbitrage open: 368 days (13.3%)
+  Average Net Arb: $-2.80/bbl
+  Max Net Arb: $9.65/bbl
+  Min Net Arb: $-16.91/bbl
+
+Brent_WTI: Atlantic Basin Crude Arb (Brent - WTI)
+  Total trading days: 2775
+  Arbitrage open: 1421 days (51.2%)
+  Average Net Arb: $0.57/bbl
+  Max Net Arb: $58.54/bbl
+  Min Net Arb: $-5.11/bbl
+
+Eurobob_USGC_Gasoline: Gasoline Arb Across Atlantic (Eurobob - USGC)
+  Total trading days: 2775
+  Arbitrage open: 2606 days (93.9%)
+  Average Net Arb: $10.40/bbl
+  Max Net Arb: $31.22/bbl
+  Min Net Arb: $-14.53/bbl
+
+Rotterdam_Singapore_Gasoil: Europe vs Asia Distillate Arb (Rotterdam - Singapore Gasoil)
+  Total trading days: 1745
+  Arbitrage open: 378 days (21.7%)
+  Average Net Arb: $-8.73/bbl
+  Max Net Arb: $29.95/bbl
+  Min Net Arb: $-78.72/bbl
+
+==================================================
+MONTE CARLO RISK ANALYSIS
+==================================================
+
+Brent_Dubai:
+  Current Net Arb: $-6.97/bbl
+  Historical Volatility: 17.869
+  Probability Arb Open: 44.6%
+  Mean Net Arb: $-5.47/bbl
+  Risk Band (5th-95th): $-71.42 to $60.36/bbl
+  Risk Band Width: $131.78/bbl
+
+Brent_WTI:
+  Current Net Arb: $-1.25/bbl
+  Historical Volatility: 1.116
+  Probability Arb Open: 44.3%
+  Mean Net Arb: $-0.48/bbl
+  Risk Band (5th-95th): $-5.81 to $4.91/bbl
+  Risk Band Width: $10.72/bbl
+
+Eurobob_USGC_Gasoline:
+  Current Net Arb: $15.01/bbl
+  Historical Volatility: 47.170
+  Probability Arb Open: 52.7%
+  Mean Net Arb: $17.15/bbl
+  Risk Band (5th-95th): $-359.23 to $390.22/bbl
+  Risk Band Width: $749.45/bbl
+
+Rotterdam_Singapore_Gasoil:
+  Current Net Arb: $-1.21/bbl
+  Historical Volatility: 7.117
+  Probability Arb Open: 50.1%
+  Mean Net Arb: $0.14/bbl
+  Risk Band (5th-95th): $-22.28 to $22.38/bbl
+  Risk Band Width: $44.66/bbl
+
+==================================================
+RECENT ARBITRAGE OPPORTUNITIES
+==================================================
+Recent opportunities found: 10
+  2025-08-08: Eurobob_USGC_Gasoline = $15.73/bbl
+  2025-08-11: Eurobob_USGC_Gasoline = $15.95/bbl
+  2025-08-12: Eurobob_USGC_Gasoline = $16.44/bbl
+  2025-08-13: Eurobob_USGC_Gasoline = $16.28/bbl
+  2025-08-14: Eurobob_USGC_Gasoline = $15.01/bbl
+  2025-08-15: Eurobob_USGC_Gasoline = $16.38/bbl
+  2025-08-18: Eurobob_USGC_Gasoline = $15.55/bbl
+  2025-08-19: Eurobob_USGC_Gasoline = $15.54/bbl
+  2025-08-20: Eurobob_USGC_Gasoline = $14.07/bbl
+  2025-08-20: Rotterdam_Singapore_Gasoil = $0.98/bbl
+
+==================================================
+PERFORMANCE METRICS
+==================================================
+Total execution time: 29.66 seconds
+Data processing efficiency: 339 calculations/second

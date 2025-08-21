@@ -1,0 +1,17 @@
+Ticker,Commodity,Region,Unit
+CL1 Comdty,Crude Oil,USA,USD/bbl
+CO1 Comdty,Crude Oil,North Sea,USD/bbl
+DBL1 Comdty,Crude Oil,Middle East,USD/bbl
+W61 Comdty,Gasoil,Singapore,USD/bbl
+QSU5 Comdty,Gasoil,Rotterdam,USD/ton
+XB1 Comdty,Gasoline,US Gulf,USD/gal
+IHW1 Comdty,Gasoline,Europe,USD/ton
+NGA Comdty,LNG,USA,USD/MMBtu
+TZTA Comdty,LNG,Europe,USD/MMBtu
+BIDY Index,Freight,Baltic Dirty Tanker,Index
+BITY Index,Freight,Baltic Clean Tanker,Index
+USDEUR Curncy,FX,Europe/US,EUR
+USDSGD Curncy,FX,Singapore/US,SGD
+JPYUSD Curncy,FX,Japan/US,USD
+GBPUSD Curncy,FX,UK/US,USD
+EURSGD Curncy,FX,Europe/Singapore,SGD
