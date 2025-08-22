@@ -503,7 +503,7 @@ class CommodityDashboard:
             'current_fx_hedging': current_fx_hedging
         }
     
-    def calculate_pnl_metrics(self, selected_arb, stats, mc_data):
+    def calculate_pnl_metrics(self, selected_arb, stats, mc_data, date_range):
         """Calculate PnL metrics for trading analysis"""
         if stats is None or len(mc_data) == 0:
             return None
@@ -514,9 +514,20 @@ class CommodityDashboard:
         # Current arbitrage opportunity
         current_net_arb = stats['current_net_arb'] if not pd.isna(stats['current_net_arb']) else 0
         
-        # PnL calculations
+        # Get only profitable arbitrage data for accurate PnL calculations
+        profitable_arb_data = self.arb_results[
+            (self.arb_results['Arb_Name'] == selected_arb) & 
+            (self.arb_results['Net_Arb'] > 0) &
+            (self.arb_results['Date'] >= date_range[0]) & 
+            (self.arb_results['Date'] <= date_range[1])
+        ]
+        
+        # Calculate average of only profitable trades
+        avg_profitable_arb = profitable_arb_data['Net_Arb'].mean() if len(profitable_arb_data) > 0 else 0
+        
+        # PnL calculations using only profitable opportunities
         current_pnl = current_net_arb * trade_size_bbl
-        avg_pnl_per_trade = stats['avg_net_arb'] * trade_size_bbl
+        avg_pnl_per_trade = avg_profitable_arb * trade_size_bbl
         
         # Trading frequency (assuming monthly trading)
         arb_open_rate = stats['arb_percentage'] / 100
@@ -526,15 +537,15 @@ class CommodityDashboard:
         monthly_pnl = avg_pnl_per_trade * trades_per_month
         annual_pnl = monthly_pnl * 12
         
-        # Risk metrics
-        max_loss = stats['min_net_arb'] * trade_size_bbl
-        max_gain = stats['max_net_arb'] * trade_size_bbl
+        # Risk metrics - use only profitable trades for max gain, overall data for max loss
+        max_loss = stats['min_net_arb'] * trade_size_bbl  # Worst case scenario
+        max_gain = profitable_arb_data['Net_Arb'].max() * trade_size_bbl if len(profitable_arb_data) > 0 else 0
         
-        # Risk-adjusted return (simple Sharpe-like ratio)
-        if stats['avg_net_arb'] != 0:
+        # Risk-adjusted return (simple Sharpe-like ratio) - use profitable average
+        if avg_profitable_arb != 0:
             # Use standard deviation from Monte Carlo if available
             volatility = mc_data['Std_Net_Arb'].iloc[0] if 'Std_Net_Arb' in mc_data.columns else abs(stats['max_net_arb'] - stats['min_net_arb']) / 4
-            risk_adjusted_return = stats['avg_net_arb'] / volatility if volatility > 0 else 0
+            risk_adjusted_return = avg_profitable_arb / volatility if volatility > 0 else 0
         else:
             risk_adjusted_return = 0
         
@@ -553,7 +564,8 @@ class CommodityDashboard:
             'max_gain': max_gain,
             'risk_adjusted_return': risk_adjusted_return,
             'prob_arb_open': prob_arb_open,
-            'var_95': var_95
+            'var_95': var_95,
+            'avg_profitable_arb': avg_profitable_arb  # Add this for reference
         }
     
     def calculate_historical_risk_metrics(self, selected_arb, date_range):
@@ -576,19 +588,19 @@ class CommodityDashboard:
         profitable_trades = filtered_data[filtered_data['Net_Arb'] > 0]
         losing_trades = filtered_data[filtered_data['Net_Arb'] < 0]
         
-        # Basic metrics
-        total_trades = len(profitable_trades) + len(losing_trades)
-        profitable_trades_count = len(profitable_trades)
-        win_rate = (profitable_trades_count / total_trades * 100) if total_trades > 0 else 0
+        # Basic metrics - show opportunity frequency instead of win rate
+        total_opportunities = len(filtered_data)  # Total days analyzed
+        profitable_opportunities = len(profitable_trades)  # Days with profitable arbitrage
+        opportunity_rate = (profitable_opportunities / total_opportunities * 100) if total_opportunities > 0 else 0
         
-        # Profit/Loss metrics
+        # Profit/Loss metrics - only consider profitable trades for average profit
         avg_profit = profitable_trades['PnL'].mean() if len(profitable_trades) > 0 else 0
-        avg_loss = abs(losing_trades['PnL'].mean()) if len(losing_trades) > 0 else 0
+        avg_loss = 0  # No losses since we only take profitable trades
         
-        # Profit factor (total profit / total loss)
+        # Profit factor (total profit / total loss) - only profit since no losses
         total_profit = profitable_trades['PnL'].sum() if len(profitable_trades) > 0 else 0
-        total_loss = abs(losing_trades['PnL'].sum()) if len(losing_trades) > 0 else 0
-        profit_factor = total_profit / total_loss if total_loss > 0 else float('inf')
+        total_loss = 0  # No losses since we only take profitable trades
+        profit_factor = float('inf') if total_profit > 0 else 0
         
         # Risk-adjusted metrics - FIXED CALCULATIONS
         returns = filtered_data['Net_Arb'].dropna()
@@ -617,11 +629,13 @@ class CommodityDashboard:
             var_95 = 0
         
         return {
-            'total_trades': total_trades,
-            'profitable_trades': profitable_trades_count,
-            'win_rate': win_rate,
+            'total_opportunities': total_opportunities,
+            'profitable_opportunities': profitable_opportunities,
+            'opportunity_rate': opportunity_rate,
             'avg_profit': avg_profit,
             'avg_loss': avg_loss,
+            'total_profit': total_profit,
+            'total_loss': total_loss,
             'profit_factor': profit_factor,
             'sharpe_ratio': sharpe_ratio,
             'max_drawdown': max_drawdown,
@@ -770,7 +784,7 @@ class CommodityDashboard:
         st.markdown("<hr style='border:1px solid #bbb; margin:10px 0;'>", unsafe_allow_html=True)
         # Get Monte Carlo data for PnL calculations
         mc_data = self.mc_results[self.mc_results['Arb_Name'] == selected_arb]
-        pnl_metrics = self.calculate_pnl_metrics(selected_arb, stats, mc_data)
+        pnl_metrics = self.calculate_pnl_metrics(selected_arb, stats, mc_data, date_range)
         historical_risk_metrics = self.calculate_historical_risk_metrics(selected_arb, date_range)
         
         if pnl_metrics and historical_risk_metrics:
@@ -786,14 +800,15 @@ class CommodityDashboard:
             with col2:
                 st.write("**Expected Returns**")
                 st.write(f"Avg PnL/Trade: ${pnl_metrics['avg_pnl_per_trade']:,.0f}")
+                st.write(f"Avg Profitable Arb: ${pnl_metrics['avg_profitable_arb']:.2f}/bbl")
                 st.write(f"Trades/Month: {pnl_metrics['trades_per_month']:.1f}")
                 st.write(f"Monthly PnL: ${pnl_metrics['monthly_pnl']:,.0f}")
                 st.write(f"Annual PnL: ${pnl_metrics['annual_pnl']:,.0f}")
             
             with col3:
                 st.write("**Historical Performance**")
-                st.write(f"Total Trades: {historical_risk_metrics['total_trades']}")
-                st.write(f"Arb Open %: {historical_risk_metrics['win_rate']:.1f}%")
+                st.write(f"Profitable Opportunities: {historical_risk_metrics['profitable_opportunities']}")
+                st.write(f"Opportunity Rate: {historical_risk_metrics['opportunity_rate']:.1f}%")
                 st.write(f"Profit Factor: {historical_risk_metrics['profit_factor']:.2f}")
                 st.write(f"Avg Profit: ${historical_risk_metrics['avg_profit']:,.0f}")
             
@@ -818,10 +833,10 @@ class CommodityDashboard:
             
             with col3:
                 st.write("**Trading Statistics**")
-                st.write(f"Profitable Trades: {historical_risk_metrics['profitable_trades']}")
+                st.write(f"Total Opportunities: {historical_risk_metrics['total_opportunities']}")
                 st.write(f"Avg Loss: ${historical_risk_metrics['avg_loss']:,.0f}")
-                st.write(f"Total Profit: ${historical_risk_metrics['total_trades'] * historical_risk_metrics['avg_profit'] * (historical_risk_metrics['win_rate']/100):,.0f}")
-                st.write(f"Total Loss: ${historical_risk_metrics['total_trades'] * historical_risk_metrics['avg_loss'] * ((100-historical_risk_metrics['win_rate'])/100):,.0f}")
+                st.write(f"Total Profit: ${historical_risk_metrics['total_profit']:,.0f}")
+                st.write(f"Total Loss: ${historical_risk_metrics['total_loss']:,.0f}")
         
         # Export option
         st.subheader("Export Data")
