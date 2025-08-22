@@ -593,14 +593,14 @@ class CommodityDashboard:
         profitable_opportunities = len(profitable_trades)  # Days with profitable arbitrage
         opportunity_rate = (profitable_opportunities / total_opportunities * 100) if total_opportunities > 0 else 0
         
-        # Profit/Loss metrics - only consider profitable trades for average profit
+        # Profit/Loss metrics - calculate both profitable and losing opportunities
         avg_profit = profitable_trades['PnL'].mean() if len(profitable_trades) > 0 else 0
-        avg_loss = 0  # No losses since we only take profitable trades
+        avg_loss = abs(losing_trades['PnL'].mean()) if len(losing_trades) > 0 else 0
         
-        # Profit factor (total profit / total loss) - only profit since no losses
+        # Profit factor (total profit / total loss) - meaningful ratio
         total_profit = profitable_trades['PnL'].sum() if len(profitable_trades) > 0 else 0
-        total_loss = 0  # No losses since we only take profitable trades
-        profit_factor = float('inf') if total_profit > 0 else 0
+        total_loss = abs(losing_trades['PnL'].sum()) if len(losing_trades) > 0 else 0
+        profit_factor = total_profit / total_loss if total_loss > 0 else float('inf')
         
         # Risk-adjusted metrics - FIXED CALCULATIONS
         returns = filtered_data['Net_Arb'].dropna()
@@ -836,7 +836,7 @@ class CommodityDashboard:
                 st.write(f"Total Opportunities: {historical_risk_metrics['total_opportunities']}")
                 st.write(f"Avg Loss: ${historical_risk_metrics['avg_loss']:,.0f}")
                 st.write(f"Total Profit: ${historical_risk_metrics['total_profit']:,.0f}")
-                st.write(f"Total Loss: ${historical_risk_metrics['total_loss']:,.0f}")
+                st.write(f"Total Loss (Avoided): ${historical_risk_metrics['total_loss']:,.0f}")
         
         # Export option
         st.subheader("Export Data")
